@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:echo_app/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:echo_app/widgets/appbar_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart'; // Para manejar permisos
 
 class CuentaHistoriaPage extends StatefulWidget{
   @override
@@ -16,15 +19,15 @@ class _CuentaHistoriaPageState extends State<CuentaHistoriaPage> {
   String _spokenText = '';
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _speech = stt.SpeechToText();
   }
 
   void _listen() async {
-    if(!_isListening){
+    if (!_isListening) {
       bool available = await _speech.initialize();
-      if(available) {
+      if (available) {
         setState(() {
           _isListening = true;
           _displayText = 'Escuchando...';
@@ -36,19 +39,52 @@ class _CuentaHistoriaPageState extends State<CuentaHistoriaPage> {
           });
         });
       }
-    }
-    else{
+    } else {
       setState(() {
         _isListening = false;
         _displayText = 'Pulsa el microfono para hablar...';
       });
-
       _speech.stop();
     }
   }
 
+  Future<void> _requestStoragePermission() async {
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      await Permission.storage.request();
+    }
+  }
+
+  // Guardar el archivo en el directorio de descargas
+  Future<void> _saveToDownloads(String text) async {
+    // Solicitar permiso para acceder al almacenamiento
+    await _requestStoragePermission();
+
+    // Obtiene el directorio de descargas en Android
+    final directory = Directory('/storage/emulated/0/Download');
+
+    if (await directory.exists()) {
+      // Construye la ruta completa para el archivo
+      final path = '${directory.path}/spoken_text.txt';
+
+      // Crea el archivo y escribe el texto
+      final file = File(path);
+      await file.writeAsString(text);
+
+      // Opcional: mostrar una notificación o mensaje al usuario
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Texto guardado en: $path')),
+      );
+      
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Texto no guardado')),
+      );
+    }
+  }
+
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(),
       body: Center(
@@ -67,9 +103,7 @@ class _CuentaHistoriaPageState extends State<CuentaHistoriaPage> {
                   color: AppColors.textPrimary,
                 ),
               ),
-
-              const SizedBox(height: 20,),
-
+              const SizedBox(height: 20),
               const Text.rich(
                 TextSpan(
                   children: [
@@ -97,38 +131,24 @@ class _CuentaHistoriaPageState extends State<CuentaHistoriaPage> {
                         fontFamily: 'Artifika',
                       ),
                     )
-                  ]
+                  ],
                 ),
-
               ),
-
-              const SizedBox(height: 40,),
-
-              //Icono de microfono
-
+              const SizedBox(height: 40),
               IconButton(
-                  onPressed: _listen,
-                  icon: Icon(
-                    _isListening ? Icons.mic : Icons.mic_none,
-                    size: 60,
-                    color: _isListening ? AppColors.accent : Colors.black,
-                  )
+                onPressed: _listen,
+                icon: Icon(
+                  _isListening ? Icons.mic : Icons.mic_none,
+                  size: 60,
+                  color: _isListening ? AppColors.accent : Colors.black,
+                ),
               ),
-
-              const SizedBox(height: 20.0,),
-
-              //Ondas de audio faltantes por implementar
-
-
-              const SizedBox(height: 20.0,),
-
+              const SizedBox(height: 20.0),
               const Text(
                 'Trata de estar en un lugar con el menor ruido de fondo posible',
                 style: TextStyle(fontSize: 16),
               ),
-
-              const SizedBox(height: 40.0,),
-
+              const SizedBox(height: 40.0),
               ElevatedButton(
                 onPressed: () {
                   _speech.stop();
@@ -136,6 +156,8 @@ class _CuentaHistoriaPageState extends State<CuentaHistoriaPage> {
                     _isListening = false;
                     _displayText = 'Pulsa el micrófono para hablar';
                   });
+                  // Guardar el texto en un archivo al detener la grabación
+                  _saveToDownloads(_spokenText);
                 },
                 style: ElevatedButton.styleFrom(
                   padding:
@@ -151,7 +173,7 @@ class _CuentaHistoriaPageState extends State<CuentaHistoriaPage> {
             ],
           ),
         ),
-      )
+      ),
     );
   }
 }
