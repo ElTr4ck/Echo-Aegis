@@ -1,104 +1,139 @@
 import 'package:flutter/material.dart';
-import '../theme/colors.dart';
-import '../widgets/appbar_custom.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-class EscucharHistoriaPage extends StatelessWidget {
+class ListenStoriesPage extends StatelessWidget {
+  const ListenStoriesPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: CustomAppBar(),
-        body: Padding(
-          padding: const EdgeInsets.only(left: 5.0, right: 5.0),
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  '¿Qué te parece escuchar algo del tema del mes?',
-                  style: TextStyle(
-                    fontSize: 36,
-                    fontFamily: 'Artifika',
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-
-                const SizedBox(height: 40,),
-
-                const SizedBox(
-                  height: 150,
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'El tema del mes es “',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 36,
-                            fontFamily: 'Artifika',
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'Historias de miedo',
-                          style: TextStyle(
-                              color: AppColors.accent,
-                              fontSize: 36,
-                              fontFamily: 'Artifika',
-                              fontWeight: FontWeight.bold
-                          ),
-                        ),
-                        TextSpan(
-                          text: '”',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 36,
-                            fontFamily: 'Artifika',
-                          ),
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-
-                const SizedBox(height: 40,),
-
-                ElevatedButton(
-                  onPressed: (){
-                    Navigator.pushNamed(context, '/escuchaHistoriaVoz');
-                  },
-                  style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                      textStyle: const TextStyle(fontSize: 24),
-                      backgroundColor: AppColors.accent,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0)
-                      )
-                  ),
-
-                  child: const Text('Si, escuchar sobre eso'),
-                ),
-
-                const SizedBox(height: 30,),
-
-                ElevatedButton(
-                  onPressed: (){
-                    Navigator.pushNamed(context, '/cuentaHistoriaVoz');
-                  },
-                  style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                      textStyle: const TextStyle(fontSize: 24),
-                      backgroundColor: AppColors.accent,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0)
-                      )
-                  ),
-
-                  child: const Text('No, escuchar otra cosa'),
-                )
-              ]
+      appBar: AppBar(
+        title: const Text(
+          'Listen to Stories',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF4a90e2),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          const Text(
+            'Choose a story to listen to:',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-        )
+          const SizedBox(height: 20),
+          _buildStoryCard(
+            title: 'The Adventure of a Lifetime',
+            author: 'Mary Johnson',
+            duration: '15 minutes',
+            imagePath: '/placeholder.svg?height=100&width=100',
+          ),
+          const SizedBox(height: 16),
+          _buildStoryCard(
+            title: 'Memories of the Old Town',
+            author: 'John Smith',
+            duration: '20 minutes',
+            imagePath: '/placeholder.svg?height=100&width=100',
+          ),
+          const SizedBox(height: 16),
+          _buildStoryCard(
+            title: 'A Day at the Beach',
+            author: 'Sarah Brown',
+            duration: '10 minutes',
+            imagePath: '/placeholder.svg?height=100&width=100',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStoryCard({
+    required String title,
+    required String author,
+    required String duration,
+    required String imagePath,
+  }) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: SvgPicture.network(
+                    imagePath,
+                    width: 80,
+                    height: 80,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'By $author',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Duration: $duration',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildAudioPlayer(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAudioPlayer() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.skip_previous),
+          iconSize: 36,
+          onPressed: () {
+            // Handle previous
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.play_arrow),
+          iconSize: 48,
+          onPressed: () {
+            // Handle play/pause
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.skip_next),
+          iconSize: 36,
+          onPressed: () {
+            // Handle next
+          },
+        ),
+      ],
     );
   }
 }

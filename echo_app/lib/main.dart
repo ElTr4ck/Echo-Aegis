@@ -1,9 +1,10 @@
-import 'package:echo_app/screens/hablando_historia_page.dart';
-import 'package:echo_app/screens/tema_sobre_hablar_page.dart';
+import 'package:echo_app/screens/leer_historia_page.dart';
+import 'package:echo_app/screens/my_library_page.dart';
 import 'package:flutter/material.dart';
 import 'package:echo_app/theme/colors.dart'; // Importacion de los colores
 import 'screens/escuchar_historia_page.dart';
 import 'screens/contar_historia_page.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 void main() {
   runApp(const EchoApp());
@@ -20,10 +21,10 @@ class EchoApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const MyHomePage(),
-        '/contarHistoria': (context) => ContarHistoriaPage(),
-        '/escucharHistoria': (context) => EscucharHistoriaPage(),
-        '/temaParaHablar': (context) => TemaParaHablar(),
-        '/hablandoHistoria': (context) => CuentaHistoriaPage(),
+        '/contarHistoria': (context) => TellStoryPage(),
+        '/escucharHistoria': (context) => ListenStoriesPage(),
+        '/miLibreria': (context) => MyLibraryPage(),
+        '/leerHistoria': (context) => ReadStoriesPage()
       },
 
       //Tema de la app
@@ -45,69 +46,146 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Image.asset('lib/assets/images/logo-no-background.png', height: 40),
-        centerTitle: true,
-        backgroundColor: AppColors.background,
-      ),
-
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Bienvenido a Echo',
-                style: TextStyle(
-                  fontSize: 36,
-                  fontFamily: 'Artifika',
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 60),
-
-              //Botones
-              ElevatedButton(
-                  onPressed: (){
-                    Navigator.pushNamed(context, '/contarHistoria');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                    textStyle: const TextStyle(fontSize: 24),
-                    backgroundColor: AppColors.accent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0)
-                    )
-                  ),
-                  child: const Text('Contar Historia')
-              ),
-
-              const SizedBox(height: 60),
-
-              ElevatedButton(
-                  onPressed: (){
-                    Navigator.pushNamed(context, '/escucharHistoria');
-                  },
-                  style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                      textStyle: const TextStyle(fontSize: 24),
-                      backgroundColor: AppColors.accent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0)
-                      )
-                  ),
-                  child: const Text('Escuchar Historia')
-              ),
-
-            ],
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Scaffold(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 30),
+                _buildButtonGrid(context),
+                const SizedBox(height: 30),
+                _buildFeaturedStory(),
+              ],
+            ),
           ),
         ),
-      )
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Column(
+      children: [
+        const SizedBox(height: 20),
+        const Text(
+          'Bienvenido a',
+          style: TextStyle(
+            fontSize: 36,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF333333),
+            fontFamily: 'Artifika'
+          ),
+        ),
+        const SizedBox(height: 10),
+        Image.asset(
+            'lib/assets/images/logo-black.png',
+            width: 300,
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          'Comparte y escucha historias impresionantes',
+          style: TextStyle(
+            fontSize: 18,
+            color: Color(0xFF666666),
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildButtonGrid(BuildContext context) {
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 15,
+      crossAxisSpacing: 15,
+      children: [
+        _buildButton(Icons.headphones, 'Escuchar Historias', context),
+        _buildButton(Icons.mic, 'Contar una Historia', context),
+        _buildButton(Icons.book, 'Leer Historias', context),
+        _buildButton(Icons.bookmark, 'Mi libreria', context),
+      ],
+    );
+  }
+
+  Widget _buildButton(IconData icon, String label, BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        if(label == 'Contar una Historia'){
+          Navigator.pushNamed(context, '/contarHistoria');
+        }
+        else if (label == 'Escuchar Historias'){
+          Navigator.pushNamed(context, '/escucharHistoria');
+        }
+        else if(label == 'Mi libreria'){
+          Navigator.pushNamed(context, '/miLibreria');
+        }
+        else if(label == 'Leer Historias'){
+          Navigator.pushNamed(context, '/leerHistoria');
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        primary: AppColors.primary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        padding: const EdgeInsets.all(20),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 32, color: AppColors.secundary),
+          const SizedBox(height: 10),
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.secundary,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+                fontFamily: 'Artifika'
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeaturedStory() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.secundary,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      padding: const EdgeInsets.all(20),
+      child: const Column(
+        children: [
+          Text(
+            'Historia Destacada',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColors.accent,
+                fontFamily: 'Artifika'
+            ),
+          ),
+          SizedBox(height: 15),
+          Text(
+            '"La aventura de una vida" - María (70 años)',
+            style: TextStyle(
+              fontSize: 18,
+              color: Color(0xFF333333),
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }
